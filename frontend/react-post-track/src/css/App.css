@@ -1,0 +1,5 @@
+body{
+    background-color: var(--surface-ground);
+    font-family: var(--font-family);
+    padding: 20px;
+}

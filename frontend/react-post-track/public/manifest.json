@@ -1,0 +1,20 @@
+{
+  "short_name": "post-track",
+  "name": "post-track",
+  "icons": [
+    {
+      "src": "./assets/img/logos/28_256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "./assets/img/logos/28_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
