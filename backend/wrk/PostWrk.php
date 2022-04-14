@@ -8,14 +8,18 @@ class PostWrk
     private $trackingNumberIdentity = "";
     private $events = [];
 
+    private $language = "";
+    private $translations = [];
     private $userId = "";
     private $cookie = "";
     private $csrfToken = "";
 
-    public function getEventsFromTrackingNumber($trackingNumber)
+    public function getEventsFromTrackingNumber($trackingNumber, $language = "fr")
     {
         $this->trackingNumber = $trackingNumber;
-        
+        $this->language = $language;
+
+        $this->loadTranslations();
         $this->getUser();
         $this->getTrackingNumberHash();
         $this->getTrackingNumberIdentity();
@@ -100,7 +104,6 @@ class PostWrk
         $this->trackingNumberHash = $response["hash"];
 
         curl_close($curl);
-
     }
 
     private function getTrackingNumberIdentity()
@@ -124,11 +127,13 @@ class PostWrk
             ),
         ));
 
-        $response = json_decode(curl_exec($curl), true)[0];
-        $this->trackingNumberIdentity = $response["identity"];
+        $response = json_decode(curl_exec($curl), true);
+        if (count($response) > 0) {
+            $response = $response[0];
+            $this->trackingNumberIdentity = $response["identity"];
+        }
 
         curl_close($curl);
-
     }
 
     private function getEvents()
@@ -150,8 +155,48 @@ class PostWrk
                 'Cookie: ' . $this->cookie,
             ),
         ));
+        $events = curl_exec($curl);
+        $events = json_decode($events, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
 
-        $this->events = curl_exec($curl);
+            usort($events, function ($a, $b) {
+                return strtotime($a['timestamp']) - strtotime($b['timestamp']);
+            });
+            foreach ($events as &$event) {
+                $event["eventName"] = $this->translate($event["eventCode"]);
+                $event["timestamp"] = date("d.m.Y (H:i)", strtotime($event["timestamp"]));
+            }
+
+            $this->events = array_reverse($events);
+        }
         curl_close($curl);
+    }
+
+    private function loadTranslations()
+    {
+        $file = file_get_contents("../data/shipment-text-messages-" . $this->language . ".json");
+        $translations = json_decode($file, true);
+        $this->translations = array_merge($translations["additional-services-text--"], $translations["shipment-text--"], $translations["country-text--"]);
+    }
+
+    private function translate($key)
+    {
+        $keys = explode(".", $key);
+        $result = "";
+        foreach ($this->translations as $translation => $value) {
+            $tKeys = explode(".", $translation);
+            $test = true;
+            $i = 0;
+            foreach ($keys as $key) {
+                if ((count($tKeys) - 1 >= $i) && ($key != "*" && $tKeys[$i] != "*") && ($key != $tKeys[$i])) {
+                    $test = false;
+                }
+                $i++;
+            }
+            if ($test) {
+                $result =  $value;
+            }
+        }
+        return $result;
     }
 }

@@ -5,19 +5,18 @@ import Tracking from "./pages/Tracking";
 import "./css/App.css";
 function App() {
   return (
-    <Tracking />
-/*     <div className="App">
+     <div className="App">
       <div className="container">
       <Router>
             <Routes>
-              <Route path="/" exact element={<Tracking />} />
-              <Route path="/login" exact element={<Login />} />
-              <Route path="/register" exact element={<Register />}></Route>
-              <Route path="/tracking" exact element={<Tracking />}></Route>
+              <Route path="/post" exact element={<Login />} />
+              <Route path="/post/login" element={<Login />} />
+              <Route path="/post/register" element={<Register />}></Route>
+              <Route path="/post/tracking" element={<Tracking />}></Route>
             </Routes>
       </Router>
       </div>
-    </div> */
+    </div> 
   );
 }
 
