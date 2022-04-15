@@ -1,20 +1,14 @@
+//CSS
 import "primeicons/primeicons.css";
 import "primereact/resources/themes/lara-dark-purple/theme.css";
 import "primereact/resources/primereact.css";
 import "../css/Tracking.css";
+
+// REACT \ ROUTER
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../api/userAPI";
-import { removeToken } from "../utils/tokenStorage";
 
-import {
-  getParcels,
-  getEvents,
-  addParcel,
-  updateParcel,
-  removeParcel,
-} from "../api/parcelAPI";
-
+// PRIMEREACT COMPONENTS
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -23,60 +17,78 @@ import { Timeline } from "primereact/timeline";
 import { Chip } from "primereact/chip";
 import { Inplace, InplaceContent, InplaceDisplay } from "primereact/inplace";
 import { confirmPopup } from "primereact/confirmpopup";
-import { Tag } from "primereact/tag";
-
-import displayPopup from "../utils/popup";
-
 import { Toast } from "primereact/toast";
 
+// CUSTOM COMPONENTS
+import Language from "../components/Language";
+
+// CUSTOM FUNCTIONS
+import { translate } from "../utils/language";
+import { displayPopup } from "../utils/popup";
+import { logout } from "../api/userAPI";
+import { removeToken } from "../utils/localStorage";
+import {
+  getParcels,
+  getEvents,
+  addParcel,
+  updateParcel,
+  removeParcel,
+} from "../api/parcelAPI";
 const Tracking = () => {
+
+  //Navigation
   const navigate = useNavigate();
+
+  //Toast
   const toast = useRef(null);
 
+  //States
   const [trackingNumber, setTrackingNumber] = useState("");
   const [newTrackingNumber, setNewTrackingNumber] = useState("");
-
   const [name, setName] = useState("");
   const [newName, setNewName] = useState("");
 
   const [parcels, setParcels] = useState([]);
-  const [activeAccordionIndex, setActiveAccordionIndex] = useState(null);
-  const headerSpace = 30;
+  const [activeParcelIndex, setActiveParcelIndex] = useState(null);
+  const [language, setLanguage] = useState();
 
+  //UseEffect
   useEffect(() => {
     getParcels()
       .then((res) => {
         setParcels(res.data.data);
       })
       .catch((err) => {
-        if (err.response.status == 403) {
+        if (err.response.status === 403) {
           navigate("/post/");
         }
       });
-  }, []);
+  }, [language]);
 
+
+  //Handlers
   const handleAddParcel = () => {
     addParcel(name, trackingNumber)
       .then((res) => {
         if (res.data.type === "error") {
-          displayPopup(toast, "error", "", res.data.data);
+          displayPopup(toast, "error", translate(res.data.data), "");
           return;
         }
-        setActiveAccordionIndex(null);
+        setActiveParcelIndex(null);
         setParcels(res.data.data);
       })
       .catch((err) => {
-        if (err.response.status == 403) {
+        if (err.response.status === 403) {
           navigate("/post/");
         }
       });
   };
 
-  const handleChangeAccordionIndex = (e) => {
-    setActiveAccordionIndex(e.index);
+  const handleChangeActiveParcelIndex = (e) => {
+    setActiveParcelIndex(e.index);
     if (e.index != null) {
       if (!("events" in parcels[e.index])) {
-        getEvents(parcels[e.index].number).then((res) => {
+        getEvents(parcels[e.index].number, language).then((res) => {
           setParcels(
             parcels.map((parcel, index) => {
               if (index === e.index) {
@@ -93,7 +105,7 @@ const Tracking = () => {
   };
 
   const handleInplaceClose = (e) => {
-    let currentParcel = parcels[activeAccordionIndex];
+    let currentParcel = parcels[activeParcelIndex];
     if (
       currentParcel.name !== newName ||
       currentParcel.number !== newTrackingNumber
@@ -101,22 +113,51 @@ const Tracking = () => {
       updateParcel(currentParcel.PK_parcel, newName, newTrackingNumber)
         .then((res) => {
           if (res.data.type === "error") {
-            displayPopup(toast, "error", "Parcel", res.data.data);
+            displayPopup(toast, "success", translate(res.data.data), "");
             return;
           }
-          displayPopup(toast, "success", "Parcel", "Updated successfully");
-          setParcels(
-            parcels.map((parcel, index) => {
-              if (index === activeAccordionIndex) {
-                parcel.name = newName;
-                parcel.number = newTrackingNumber;
-              }
-              return parcel;
-            })
-          );
+
+          if (currentParcel.name !== newName) {
+            setParcels(
+              parcels.map((parcel, index) => {
+                if (index === activeParcelIndex) {
+                  parcel.name = newName;
+                }
+                return parcel;
+              })
+            );
+            displayPopup(
+              toast,
+              "success",
+              translate("EDIT_PARCEL_SUCCESS"),
+              ""
+            );
+
+            return;
+          }
+
+          getEvents(newTrackingNumber, language).then((res) => {
+            setParcels(
+              parcels.map((parcel, index) => {
+                if (index === activeParcelIndex) {
+                  parcel.name = newName;
+                  parcel.number = newTrackingNumber;
+                  parcel.events = res.data.data;
+                }
+                return parcel;
+              })
+            );
+            setNewTrackingNumber(currentParcel.number);
+            displayPopup(
+              toast,
+              "success",
+              translate("EDIT_PARCEL_SUCCESS"),
+              ""
+            );
+          });
         })
         .catch((err) => {
-          if (err.response.status == 403) {
+          if (err.response.status === 403) {
             navigate("/post/");
           }
         });
@@ -126,19 +167,26 @@ const Tracking = () => {
   const handleRemoveParcel = (event, PK_parcel) => {
     confirmPopup({
       target: event.currentTarget,
-      message: "Are you sure you want to delete this parcel?",
+      message: translate("REMOVE_PARCEL"),
+      acceptLabel: translate("YES"),
+      rejectLabel: translate("NO"),
       icon: "pi pi-exclamation-triangle",
       accept: () => {
         removeParcel(PK_parcel).then((res) => {
           if (res.data.type === "error") {
-            displayPopup(toast, "error", "Parcel", res.data.data);
+            displayPopup(toast, "error", translate(res.data.data), "");
             return;
           }
           setParcels(
             parcels.filter((parcel) => parcel.PK_parcel !== PK_parcel)
           );
-          setActiveAccordionIndex(null);
-          displayPopup(toast, "success", "Parcel", "Updated successfully");
+          setActiveParcelIndex(null);
+          displayPopup(
+            toast,
+            "success",
+            translate("REMOVE_PARCEL_SUCCESS"),
+            ""
+          );
         });
       },
       reject: () => {},
@@ -152,19 +200,25 @@ const Tracking = () => {
     });
   };
 
+  const handleLanguageChange = (e) => {
+    setLanguage(e);
+    setActiveParcelIndex(null);
+  };
+
   return (
     <div>
       <div className="col-12 text-end">
         <Button
-          className="p-button-outlined p-button-rounded p-button-sm"
-          label="Logout"
+          className="p-button-text p-button-sm mx-5"
+          label={translate("LOGOUT")}
           onClick={handleLogout}
         />
+        <Language onLanguageChange={handleLanguageChange} />
       </div>
       <Toast ref={toast} />
       <div className="row justify-content-center mb-4">
         <div className="col-8">
-          <h1 className="text-light text-center">CH Post Track</h1>
+          <h1 className="text-light text-center">{translate("MY_PARCELS")}</h1>
         </div>
       </div>
       <div className="row justify-content-center mb-4">
@@ -179,7 +233,7 @@ const Tracking = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
-                  <label htmlFor="name">Name</label>
+                  <label htmlFor="name">{translate("PARCEL_NAME")}</label>
                 </span>
               </div>
               <div className="col-4">
@@ -190,12 +244,14 @@ const Tracking = () => {
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
                   />
-                  <label htmlFor="trackingNumber">Tracking Number</label>
+                  <label htmlFor="trackingNumber">
+                    {translate("PARCEL_NUMBER")}
+                  </label>
                 </span>
               </div>
               <div className="col-4">
                 <Button
-                  label="Add"
+                  label={translate("ADD_PARCEL")}
                   icon="pi pi-plus-circle"
                   iconPos="right"
                   onClick={handleAddParcel}
@@ -209,8 +265,8 @@ const Tracking = () => {
         <div className="col-8">
           <Card>
             <Accordion
-              activeIndex={activeAccordionIndex}
-              onTabChange={handleChangeAccordionIndex}
+              activeIndex={activeParcelIndex}
+              onTabChange={handleChangeActiveParcelIndex}
             >
               {parcels.map((parcel, index) => (
                 <AccordionTab
@@ -257,7 +313,9 @@ const Tracking = () => {
                   <div className="row mt-5">
                     <div className="col-6 text-center">
                       <Inplace closable onClose={handleInplaceClose}>
-                        <InplaceDisplay>Edit parcel name</InplaceDisplay>
+                        <InplaceDisplay>
+                          {translate("EDIT_PARCEL_NAME")}
+                        </InplaceDisplay>
                         <InplaceContent>
                           <InputText
                             value={newName}
@@ -269,7 +327,9 @@ const Tracking = () => {
                     </div>
                     <div className="col-6 text-center">
                       <Inplace closable onClose={handleInplaceClose}>
-                        <InplaceDisplay>Edit parcel number</InplaceDisplay>
+                        <InplaceDisplay>
+                          {translate("EDIT_PARCEL_NUMBER")}
+                        </InplaceDisplay>
                         <InplaceContent>
                           <InputText
                             value={newTrackingNumber}

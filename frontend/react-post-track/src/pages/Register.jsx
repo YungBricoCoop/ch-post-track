@@ -1,49 +1,65 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+// CSS
 import "primeicons/primeicons.css";
 import "primereact/resources/themes/lara-dark-purple/theme.css";
 import "primereact/resources/primereact.css";
 
+// REACT \ ROUTER
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
+// PRIMEREACT COMPONENTS
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 
+// CUSTOM COMPONENTS
+import Language from "../components/Language";
+
+//CUSTOM FUNCTIONS
 import { register } from "../api/userAPI";
-import displayPopup from "../utils/popup";
+import {displayPopup} from "../utils/popup";
+import { translate } from "../utils/language";
 
 const Register = () => {
+  
+  //Navigation
   const navigate = useNavigate();
+
+  //Toast
   const toast = useRef(null);
 
+  //States
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [language, setLanguage] = useState("");
 
+
+  //Handlers 
   const handleRegister = () => {
     register(username, password).then((res) => {
       if (res.data.type === "error") {
-        displayPopup(toast, "error", "Register", res.data.data);
+        displayPopup(toast, "error", translate(res.data.data), "");
         return;
       }
       navigate("/post/login");
     });
   };
 
-
   return (
     <div>
       <div className="col-12 text-end">
         <Button
-          className="p-button-outlined p-button-rounded p-button-sm"
-          label="Login"
+          className="p-button-text p-button-sm mx-5"
+          label={translate("LOGIN")}
           onClick={()=>navigate("/post/login")}
         />
+        <Language onLanguageChange={setLanguage} />
       </div>
       <Toast ref={toast} />
       <div className="row justify-content-center mb-4">
         <div className="col-8">
-          <h1 className="text-light text-center">Register</h1>
+          <h1 className="text-light text-center">{translate("REGISTER")}</h1>
         </div>
       </div>
       <div className="row justify-content-center mb-4">
@@ -56,7 +72,7 @@ const Register = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">{translate("USERNAME")}</label>
             </span>
             <span className="p-float-label mb-4">
               <InputText
@@ -65,11 +81,11 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{translate("PASSWORD")}</label>
             </span>
             <Button
               className="w-100 mb-2"
-              label="Register"
+              label={translate("REGISTER")}
               icon="pi pi-user"
               iconPos="right"
               onClick={handleRegister}

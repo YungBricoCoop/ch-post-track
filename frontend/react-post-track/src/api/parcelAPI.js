@@ -9,9 +9,9 @@ const getParcels = () => {
   });
 };
 
-const getEvents = (number) => {
+const getEvents = (number, language) => {
   return axios.get(URLS.PARCEL, {
-    params: { action: "getEvents", number },
+    params: { action: "getEvents", number, language },
     withCredentials: true,
   });
 };

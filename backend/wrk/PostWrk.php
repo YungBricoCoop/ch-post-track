@@ -14,10 +14,10 @@ class PostWrk
     private $cookie = "";
     private $csrfToken = "";
 
-    public function getEventsFromTrackingNumber($trackingNumber, $language = "fr")
+    public function getEventsFromTrackingNumber($trackingNumber, $language = "en")
     {
         $this->trackingNumber = $trackingNumber;
-        $this->language = $language;
+        $this->language = strtolower($language);
 
         $this->loadTranslations();
         $this->getUser();

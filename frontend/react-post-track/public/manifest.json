@@ -1,14 +1,14 @@
 {
-  "short_name": "post-track",
-  "name": "post-track",
+  "short_name": "ch-post-track",
+  "name": "ch-post-track",
   "icons": [
     {
-      "src": "./assets/img/logos/28_256.png",
+      "src": "./assets/img/logos/chPostTrack256.png",
       "type": "image/png",
       "sizes": "256x256"
     },
     {
-      "src": "./assets/img/logos/28_512.png",
+      "src": "./assets/img/logos/chPostTrack512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

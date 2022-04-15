@@ -17,17 +17,19 @@ $postWrk = new PostWrk();
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     switch ($_GET["action"]) {
-        case "getEvents":
-            check_required_parameters($_GET, ["number"]);
-            check_is_logged();
-            $events = $postWrk->getEventsFromTrackingNumber($_GET["number"]);
-            http_response(200, "success", $events);
-
         case "getParcels":
             check_is_logged();
             $PK_user = $session->getPK_user();
             $result = $parcelWrk->getParcels($PK_user);
             http_response(200, "success", $result);
+
+        case "getEvents":
+            check_required_parameters($_GET, ["number", "language"]);
+            check_is_logged();
+            $events = $postWrk->getEventsFromTrackingNumber($_GET["number"], $_GET["language"]);
+            http_response(200, "success", $events);
+
+
     }
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST["action"])) {
@@ -41,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     $result = $parcelWrk->getParcels($PK_user);
                     http_response(200, "success", $result);
                 }
-                http_response(400, "error", "Error while adding parcel");
+                http_response(200, "error", "UNKNOWN_ERROR");
                 break;
             case "updateParcel":
                 check_required_parameters($_POST, ["PK_parcel", "name", "number"]);
@@ -51,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 if ($result) {
                     http_response(200, "success", "Parcel updated");
                 }
-                http_response(400, "error", "Error while updating parcel");
+                http_response(200, "error", "UNKNOWN_ERROR");
                 break;
             case "removeParcel":
                 check_required_parameters($_POST, ["PK_parcel"]);
@@ -61,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 if ($result) {
                     http_response(200, "success", "Parcel removed");
                 }
-                http_response(400, "error", "Error while removing parcel");
+                http_response(200, "error", "UNKNOWN_ERROR");
                 break;
         }
     }

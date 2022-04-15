@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $session->setPK_user($user['PK_user']);
                         http_response(200, "success", array("loginToken" => $user["loginToken"]));
                     }
-                    http_response(200, "error", "Wrong credentials");
+                    http_response(200, "error", "WRONG_PASSWORD");
                 }
-                http_response(200, "error", "Username not found");
+                http_response(200, "error", "USERNAME_NOT_FOUND");
                 break;
 
             case "tokenLogin":
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $session->setPK_user($user['PK_user']);
                     http_response(200, "success", array("loginToken" => $user["loginToken"]));
                 }
-                http_response(200, "error", "Invalid login token");
+                http_response(200, "error", "UNKNOWN_ERROR");
 
                 break;
 
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $lokinToken = bin2hex($lokinToken);
 
                 if ($userWrk->alredyExist($_POST["username"])) {
-                    http_response(400, "error", "Username already exist");
+                    http_response(200, "error", "USERNAME_ALREADY_EXIST");
                 }
 
                 $result = $userWrk->register($_POST["username"], password_hash($_POST["password"], PASSWORD_DEFAULT), $lokinToken);
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($result) {
                     http_response(200, "success", "Successfully registered");
                 } else {
-                    http_response(400, "error", "Error while registering");
+                    http_response(200, "error", "UNKNOWN_ERROR");
                 }
 
                 break;

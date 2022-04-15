@@ -1,36 +1,40 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+// CSS
 import "primeicons/primeicons.css";
 import "primereact/resources/themes/lara-dark-purple/theme.css";
 import "primereact/resources/primereact.css";
 
+// REACT \ ROUTER
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+// PRIMEREACT COMPONENTS
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 
+// CUSTOM COMPONENTS
+import Language from "../components/Language";
+
+// CUSTOM FUNCTIONS
 import { login, tokenLogin } from "../api/userAPI";
-import displayPopup from "../utils/popup";
-import { saveToken, getToken, removeToken } from "../utils/tokenStorage";
+import { displayPopup } from "../utils/popup";
+import { saveToken, getToken, removeToken } from "../utils/localStorage";
+import { translate } from "../utils/language";
 
 const Login = () => {
+
+  //Navigation
   const navigate = useNavigate();
+  //Toast
   const toast = useRef(null);
+
+  //States
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [language, setLanguage] = useState("");
 
-  const handleLogin = () => {
-    login(username, password).then((res) => {
-      if (res.data.type === "error") {
-        displayPopup(toast, "error", "Login", res.data.data);
-        return;
-      }
-      saveToken(res.data.data.loginToken);
-      navigate("/post/tracking");
-    });
-  };
-
+  //UseEffect
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -44,19 +48,32 @@ const Login = () => {
     }
   }, []);
 
+  //Handlers
+  const handleLogin = () => {
+    login(username, password).then((res) => {
+      if (res.data.type === "error") {
+        displayPopup(toast, "error", translate(res.data.data), "");
+        return;
+      }
+      saveToken(res.data.data.loginToken);
+      navigate("/post/tracking");
+    });
+  };
+
   return (
     <div>
       <div className="col-12 text-end">
         <Button
-          className="p-button-outlined p-button-rounded p-button-sm"
-          label="Register"
-          onClick={()=>navigate("/post/register")}
+          className="p-button-text p-button-sm mx-5"
+          label={translate("REGISTER")}
+          onClick={() => navigate("/post/register")}
         />
+        <Language onLanguageChange={setLanguage} />
       </div>
       <Toast ref={toast} />
       <div className="row justify-content-center mb-4">
         <div className="col-8">
-          <h1 className="text-light text-center">Login</h1>
+          <h1 className="text-light text-center">{translate("LOGIN")}</h1>
         </div>
       </div>
       <div className="row justify-content-center mb-4">
@@ -69,7 +86,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">{translate("USERNAME")}</label>
             </span>
             <span className="p-float-label mb-4">
               <InputText
@@ -78,11 +95,11 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{translate("PASSWORD")}</label>
             </span>
             <Button
               className="w-100 mb-2"
-              label="Login"
+              label={translate("LOGIN")}
               icon="pi pi-user"
               iconPos="right"
               onClick={handleLogin}
