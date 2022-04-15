@@ -38,6 +38,8 @@ npm start
 # Post.ch API Explanation 
 
 To get the event list of a parcel you have to make several requests to the Post API. Since it is not possible from the frontend because of cores we will do it from the backend. however we will need to save the cookies/x-csrf-token to use them in requests
+<br/>
+Endpoint : https://service.post.ch/ekp-web/api/
 
 ```mermaid
 sequenceDiagram
