@@ -83,8 +83,11 @@ class PostWrk
 
         $curl = curl_init();
 
+        $url = 'https://service.post.ch/ekp-web/api/history?userId=' . urlencode($this->userId);
+        $url = $this->protectUrl($url);
+
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://service.post.ch/ekp-web/api/history?userId=' . urlencode($this->userId),
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -111,6 +114,8 @@ class PostWrk
         $curl = curl_init();
 
         $url = 'https://service.post.ch/ekp-web/api/history/not-included/' . $this->trackingNumberHash . '?userId=' . urlencode($this->userId);
+        $url = $this->protectUrl($url);
+
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
@@ -139,9 +144,11 @@ class PostWrk
     private function getEvents()
     {
         $curl = curl_init();
+        $url = 'https://service.post.ch/ekp-web/api/shipment/id/' . $this->trackingNumberIdentity . '/events/';
+        $url = $this->protectUrl($url);
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://service.post.ch/ekp-web/api/shipment/id/' . $this->trackingNumberIdentity . '/events/',
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -198,5 +205,14 @@ class PostWrk
             }
         }
         return $result;
+    }
+
+    private function protectUrl($url)
+    {
+        if (substr_count($url, "https://") == 1 && substr_count($url, "http://") == 0 && substr_count($url, "./") == 0 && substr_count($url, "../") == 0) {
+            return $url;
+        } else {
+            return "";
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 
 export const URLS = {
-    PARCEL : 'https://elwan.ch/post/api/ctrl/parcel.php',
-    USER : 'https://elwan.ch/post/api/ctrl/user.php',
+    PARCEL : '*******/api/ctrl/parcel.php',
+    USER : '*******/api/ctrl/user.php',
 
 }

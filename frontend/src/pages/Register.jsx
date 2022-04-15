@@ -76,6 +76,7 @@ const Register = () => {
             </span>
             <span className="p-float-label mb-4">
               <InputText
+              type="password"
                 className="w-100"
                 id="password"
                 value={password}

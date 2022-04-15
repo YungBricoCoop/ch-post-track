@@ -23,7 +23,6 @@ import { saveToken, getToken, removeToken } from "../utils/localStorage";
 import { translate } from "../utils/language";
 
 const Login = () => {
-
   //Navigation
   const navigate = useNavigate();
   //Toast
@@ -90,6 +89,7 @@ const Login = () => {
             </span>
             <span className="p-float-label mb-4">
               <InputText
+                type="password"
                 className="w-100"
                 id="password"
                 value={password}
