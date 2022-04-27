@@ -9,7 +9,7 @@ function App() {
       <div className="container">
       <Router>
             <Routes>
-              <Route path="/post" exact element={<Login />} />
+              <Route path="/post/" exact element={<Login />} />
               <Route path="/post/login" element={<Login />} />
               <Route path="/post/register" element={<Register />}></Route>
               <Route path="/post/tracking" element={<Tracking />}></Route>
